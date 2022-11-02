@@ -1,0 +1,55 @@
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: auto
+    password_hashers:
+        # this internal class is used by Symfony to represent in-memory users
+        # (the 'InMemoryUser' class was introduced in Symfony 5.3.
+        # In previous versions it was called 'User')
+        Symfony\Component\Security\Core\User\InMemoryUser: 'auto'
+        App\Entity\User: 'auto'
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        login:
+            pattern:  ^/login
+            stateless: true
+            anonymous: true
+            json_login:
+                username_path: email
+                check_path:               /login
+                success_handler:          lexik_jwt_authentication.handler.authentication_success
+                failure_handler:          lexik_jwt_authentication.handler.authentication_failure
+
+        refresh:
+            pattern: ^/token/refresh
+            stateless: true
+            anonymous: true
+
+        api:
+            pattern:   ^/api
+            stateless: true
+            anonymous: true
+            provider: app_user_provider
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            anonymous: ~
+
+    access_control:
+        - { path: ^/reset/*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/activateAccount, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/pokemons, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/*, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/user, roles: [IS_AUTHENTICATED_FULLY, ROLE_ADMIN] }

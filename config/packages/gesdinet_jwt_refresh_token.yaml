@@ -1,0 +1,9 @@
+#gesdinet_jwt_refresh_token:
+#
+#    user_identity_field:  email
+#    user_provider: security.user.provider.concrete.app_provider
+#    user_provider: security.user.provider.concrete.users
+gesdinet_jwt_refresh_token:
+    user_provider: security.user.provider.concrete.app_user_provider
+    ttl: 3600
+    user_identity_field:  email
